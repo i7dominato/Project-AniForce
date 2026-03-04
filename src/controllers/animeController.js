@@ -1,10 +1,9 @@
-const pool = require('../config/database')
+const animeService = require('../services/animeService')
 
 exports.list = async (req, res) => {
   try {
-  const result = await 
-pool.query('SELECT  * FROM animes')
-  res.status(201).json(result.rows)
+    const animes = await animeService.list()
+  res.status(200).json(animes)
  } catch (error) {
    console.error(error)
    res.status(500).json({ error: 'Erro interno do servidor'})
@@ -12,18 +11,17 @@ pool.query('SELECT  * FROM animes')
 }
 exports.create = async (req, res) => {
   try {
-  const { title, description } = 
+    const { title, description } = 
 req.body 
 
-  const result = await pool.query(
-     'INSERT INTO animes (title, description) VALUES ($1, $2) RETURNING *',
-    [title, description]
-  )
   if (!title || !description) {
     return res.status(400).json({ error:'Title e description são obrigatórios'})
   }
 
-  res.status(201).json(result.rows[0])
+  const anime = await animeService.create(title, description)
+
+  res.status(201).json(anime)
+  
  } catch (error) {
    console.error(error)
    res.status(500).json({ error: 'Erro interno do servidor'})
@@ -31,18 +29,19 @@ req.body
 }
 exports.update = async (req, res) => {
   try {
-  const {id} = req.params
-  const {title, description} = req.body
+    const {id} = req.params
+    const {title, description} = req.body
   
-  const result = await pool.query(
-    'UPDATE animes SET title = $1, description = $2 WHERE id = $3 RETURNING*',
-     [title, description, id]
-  )
   if (!title || !description) {
     return res.status(400).json({ error:'Title e description são obrigatórios'})
   }
+  const anime = await animeService.update(id, title, description)
 
-  res.status(201).json(result.rows[0])
+  if(!anime) {
+    return res.status(404).json({ error: 'Anime não encontrado'})
+  }
+
+  res.status(200).json(anime)
  } catch (error) {
    console.error(error)
    res.status(500).json({ error: 'Erro interno do servidor'})
@@ -50,14 +49,16 @@ exports.update = async (req, res) => {
 } 
 exports.remove = async (req, res) => {
   try {
-  const {id} = req.params
+    const {id} = req.params
 
-  const result = await pool.query(
-    'DELETE FROM animes WHERE id = $1 RETURNING *',
-    [id]
-  )
+    const anime = await animeService.remove(id)
 
-  res.status(201).json(result.rows[0])
+    if (!anime) {
+      return res.status(404).json({ error: 'Anime não encontrado'})
+    }
+
+  res.status(200).json({ message: 'Anime removido com sucesso'})
+
  } catch (error) {
    console.error(error)
    res.status(500).json({ error: 'Erro interno do servidor'})
