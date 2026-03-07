@@ -11,3 +11,4 @@ app.use(express.json())
 
 app.use("/api/animes", require('./routes/animeRoutes'))
 module.exports = app 
+app.use('/api/users', require('./routes/userRoutes')) 
