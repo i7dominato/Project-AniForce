@@ -3,7 +3,10 @@ const animeService = require('../services/animeService')
 exports.list = async (req, res) => {
   try {
     const animes = await animeService.list()
-  res.status(200).json(animes)
+  res.status(200).json({
+    success: true,
+    data: animes
+  })
  } catch (error) {
    console.error(error)
    res.status(500).json({ error: 'Erro interno do servidor'})
